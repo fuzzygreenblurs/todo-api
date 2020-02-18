@@ -10,7 +10,12 @@ gem 'thin'
 gem 'shotgun'
 gem 'pry'
 gem 'bcrypt'
+gem 'activemodel'
+gem 'annotate', '2.7.5'
 gem 'tux'
+gem 'awesome_print'
+gem 'jwt'
+
 
 group :test do
   gem 'rspec'
