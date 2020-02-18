@@ -1,7 +1,6 @@
 require './config/environment'
 
 class ApplicationController < Sinatra::Base
-  attr_accessor :current_user
 
   PUBLIC_ENDPOINTS = ['/', '/login', '/signup']
 
@@ -33,11 +32,11 @@ class ApplicationController < Sinatra::Base
     end
   end
 
-  def encoded_token
+  def encoded_token(identifier)
     payload = {
       issued_at: Time.now.to_i,
       expires_at: Time.now.to_i + 3600,
-      user_identifier: params[:email],
+      identifier: identifier
       #can add role capability
     }
 
@@ -45,17 +44,15 @@ class ApplicationController < Sinatra::Base
   end
 
   def authorize_request!
-    if user_identifier_in_token?
-      @current_user = User.find_by(email: decoded_payload[:user_identifier])
-      return true unless @current_user
-    end
-
+    return if user_identifier_in_token? && current_user
     halt 401
   rescue JWT::VerificationError, JWT::DecodeError
-    api_response(401, {}, ['Invalid JWT token'])
+    api_response(401, {}, ['Invalid bearer token'])
   end
 
-  private
+  def current_user
+    @current_user ||= User.find_by(id: decoded_payload['identifier'])
+  end
 
   def incoming_token
     @incoming_token ||= if request.env['HTTP_AUTHORIZATION'].present?
@@ -70,7 +67,7 @@ class ApplicationController < Sinatra::Base
   def user_identifier_in_token?
     incoming_token &&
     decoded_payload &&
-    decoded_payload['user_identifier'] &&
+    decoded_payload['identifier'] &&
     Time.now.to_i < decoded_payload['expires_at']
   end
 

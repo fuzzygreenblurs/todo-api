@@ -1,46 +1,33 @@
 class UsersController < ApplicationController
-
-  # GET: /users
-  get "/users" do
-    # admin function only
-    # return batch of users based on parameters passed in
-  end
-
   post "/signup" do
     user = User.create(params)
     halt 400, user.errors.messages if user.invalid?
-    redirect "/login"
+    redirect to ("/login"), 201
   end
 
   post "/login" do
     user = User.find_by(email: params[:email])
     if user && user.authenticate(params[:password])
-      api_response(200, {token: encoded_token})
+      api_response(200, {token: encoded_token(user.id)})
     end
 
     401
   end
 
-  # GET: /users/5
-  get "/users/:email" do
-    user = User.find_by(email: params[:email])
-    api_response(200, { user: user.to_json }) if user
-
-    404
+  # for simplicity, users can only get/update/delete their own records
+  # if needed, we can include admin authorization to allow these users to access all records
+  get "/users/me" do
+    ap "gets to redirect"
+    api_response(200, { user: current_user })
   end
 
-  # GET: /users/5/edit
-  get "/users/:id/edit" do
-    # admin or self user function only
+  # only expose PUT for idempotency, since user records are small. PATCH is unnecessary here.
+  put "/users/me/edit" do
+    current_user.update(params)
+    redirect "/users/me"
   end
 
-  # PATCH: /users/5
-  patch "/users/:id" do
-    redirect "/users/:id"
-  end
-
-  # DELETE: /users/5/delete
-  delete "/users/:id/delete" do
-    redirect "/users"
+  delete "/users/me/delete" do
+    api_response(200, {msg: "User deleted"}) if current_user.destroy
   end
 end
