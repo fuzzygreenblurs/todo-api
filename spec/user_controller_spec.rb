@@ -33,21 +33,34 @@ describe UsersController, type: :request do
     expect(JSON.parse(last_response.body)["data"]["token"]).to eq(user_token(user.id))
   end
 
-  it "current_user can GET their public attributes" do
+  it "current_user can view their public attributes" do
+    headers = { "HTTP_AUTHORIZATION" => "Bearer #{user_token(user.id)}" }
     expected_payload = {
       "email" => "#{user.email}",
       "first_name" => "#{user.first_name}",
       "last_name" => "#{user.last_name}"
     }
-
-    headers = { "HTTP_AUTHORIZATION" => "Bearer #{user_token(user.id)}" }
-
     get('/users/me', {}, headers)
     expect(JSON.parse(last_response.body)["data"]["user"]).to eq(expected_payload)
   end
 
-  # it "something else" do
-  # end
+  it "current user can update their attributes" do
+    headers = { "HTTP_AUTHORIZATION" => "Bearer #{user_token(user.id)}" }
+    request_payload = { last_name: "grievous" }
+
+    put('/users/me/edit', { last_name: "grievous" }, headers)
+    expect(user.reload.last_name).to eq("grievous")
+
+    # revert name change to ensure tests pass out of order
+    put('/users/me/edit', { last_name: "tso" }, headers)
+    expect(user.reload.last_name).to eq("tso")
+  end
+
+  it "current user can destroy their account" do
+    headers = { "HTTP_AUTHORIZATION" => "Bearer #{user_token(user.id)}" }
+    delete('/users/me/delete', {} , headers)
+    expect(User.find_by(email: "generaltso@email.com")).to be(nil)
+  end
 
   def user_token(user_id)
     stub_const('ENV', {'JWT_SECRET' => 'MY_JWT_SECRET'})

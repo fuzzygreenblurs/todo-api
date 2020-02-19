@@ -20,7 +20,6 @@ class UsersController < ApplicationController
     api_response(200, { user: current_user })
   end
 
-  # only expose PUT for idempotency, since user records are small. PATCH is unnecessary here.
   put "/users/me/edit" do
     current_user.update(params)
     redirect "/users/me"
