@@ -13,7 +13,6 @@ gem 'bcrypt'
 gem 'activemodel'
 gem 'annotate', '2.7.5'
 gem 'tux'
-gem 'awesome_print'
 gem 'jwt'
 
 

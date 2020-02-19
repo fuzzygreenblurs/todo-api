@@ -17,7 +17,6 @@ class UsersController < ApplicationController
   # for simplicity, users can only get/update/delete their own records
   # if needed, we can include admin authorization to allow these users to access all records
   get "/users/me" do
-    ap "gets to redirect"
     api_response(200, { user: current_user })
   end
 

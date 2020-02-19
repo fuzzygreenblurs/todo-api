@@ -25,7 +25,6 @@ GEM
       activerecord (>= 3.2, < 7.0)
       rake (>= 10.4, < 13.0)
     arel (6.0.4)
-    awesome_print (1.8.0)
     bcrypt (3.1.13)
     bond (0.5.1)
     builder (3.2.4)
@@ -121,7 +120,6 @@ DEPENDENCIES
   activemodel
   activerecord (~> 4.2, >= 4.2.6)
   annotate (= 2.7.5)
-  awesome_print
   bcrypt
   capybara
   database_cleaner!

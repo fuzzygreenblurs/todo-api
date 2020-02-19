@@ -20,8 +20,13 @@ describe ApplicationController do
   end
 
   it "performs authorization check for api endpoints" do
-    # all other routes go through authorization
     expect_any_instance_of(ApplicationController).to receive(:authorize_request!)
-    get '/users/me'
+    get '/users/me', nil, {'HTTP_ACCEPT' => "application/json"}
+  end
+
+  it "redirects to login route if unauthorized" do
+      get '/users/me'
+      expect(last_response.status).to eq(302)
+      expect(last_response.location).to match("http://example.org/login")
   end
 end

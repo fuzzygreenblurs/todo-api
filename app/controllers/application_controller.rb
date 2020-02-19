@@ -1,13 +1,13 @@
 require './config/environment'
 
 class ApplicationController < Sinatra::Base
+  # set :show_exceptions, false
 
   PUBLIC_ENDPOINTS = ['/', '/login', '/signup']
 
   before do
     content_type :json
     convert_params_to_json
-
     skip_authorization_for_public_endpoints
     authorize_request!
   end
@@ -46,13 +46,20 @@ class ApplicationController < Sinatra::Base
 
   def authorize_request!
     return if user_identifier_in_token? && current_user
-    halt 401
+    redirect to ("/login")
   rescue JWT::VerificationError, JWT::DecodeError
     api_response(401, {}, ['Invalid bearer token'])
   end
 
   def current_user
     @current_user ||= User.find_by(id: decoded_payload['identifier'])
+  end
+
+  def user_identifier_in_token?
+    incoming_token &&
+    decoded_payload &&
+    decoded_payload['identifier'] &&
+    Time.now.to_i < decoded_payload['expires_at']
   end
 
   def incoming_token
@@ -63,13 +70,6 @@ class ApplicationController < Sinatra::Base
 
   def decoded_payload
     @decoded_payload ||= JWT.decode(incoming_token, 'MY_JWT_SECRET', 'HS256').first
-  end
-
-  def user_identifier_in_token?
-    incoming_token &&
-    decoded_payload &&
-    decoded_payload['identifier'] &&
-    Time.now.to_i < decoded_payload['expires_at']
   end
 
   def skip_authorization_for_public_endpoints
