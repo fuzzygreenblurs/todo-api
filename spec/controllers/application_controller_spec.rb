@@ -1,4 +1,4 @@
-require_relative "spec_helper"
+require_relative "../spec_helper"
 
 describe ApplicationController do
   it "responds with a welcome message" do
@@ -19,7 +19,7 @@ describe ApplicationController do
     post('/signup', { first_name: "foo", last_name: "bar", email: "baz" }, headers )
   end
 
-  it "performs authorization check for api endpoints" do
+  it "performs authorization check for secured endpoints" do
     expect_any_instance_of(ApplicationController).to receive(:authorize_request!)
     get '/users/me', nil, {'HTTP_ACCEPT' => "application/json"}
   end
