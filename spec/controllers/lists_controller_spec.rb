@@ -40,7 +40,7 @@
       target_list = List.find_by(title: "has tasks")
       target_tasks = target_list.tasks.pluck(:id)
 
-      delete("/lists/#{target_list.id}/delete", {} , headers)
+      delete("/lists/#{target_list.id}", {} , headers)
       expect(List.find_by(id: target_list.id)).to be(nil)
       expect(Task.where(id: target_tasks).count).to be(0)
     end
@@ -61,14 +61,30 @@
         "HTTP_AUTHORIZATION" => "Bearer #{user_token(unauthorized_user.id)}"
       }
 
-      delete("/lists/#{target_list.id}/delete", {} , unauthorized_user_headers)
+      delete("/lists/#{target_list.id}", {} , unauthorized_user_headers)
       expect(List.find_by(id: target_list.id)).not_to be(nil)
       expect(Task.where(id: target_tasks).count).not_to be(0)
     end
 
     it "users can update existing tasks or add new tasks to list" do
+      target_list = List.find_by(title: "has tasks")
+      existing_task = Task.find_by(list_id: target_list.id, name: "brush my teeth")
+      expect(target_list.tasks.count).to eq(1)
+      expect(existing_task.priority).to eq("low")
 
+      changes = {
+        title: "i now have more tasks",
+        tasks: [
+          { id: existing_task.id, name: "brush my teeth", priority: "high" },
+          { name: "write code", priority: "high" }
+        ]
+      }
 
+      put("/lists/#{target_list.id}", changes, headers)
+
+      expect(target_list.reload.title).to eq(changes[:title])
+      expect(target_list.tasks.count).to eq(2)
+      expect(existing_task.reload.priority).to eq("high")
     end
 
     def setup_user_lists
