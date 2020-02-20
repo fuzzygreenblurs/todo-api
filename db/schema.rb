@@ -22,15 +22,14 @@ ActiveRecord::Schema.define(version: 20200216205050) do
 
   create_table "tasks", force: :cascade do |t|
     t.integer  "list_id"
-    t.string   "name",                                         null: false
+    t.string   "name",                                     null: false
     t.integer  "priority",                     default: 0
     t.integer  "completion_status",            default: 0
     t.datetime "completion_status_updated_at"
-    t.boolean  "recurring",                    default: false
-    t.datetime "recurring_schedule"
+    t.string   "recurring_schedule"
     t.datetime "deadline"
-    t.datetime "created_at",                                   null: false
-    t.datetime "updated_at",                                   null: false
+    t.datetime "created_at",                               null: false
+    t.datetime "updated_at",                               null: false
   end
 
   create_table "users", force: :cascade do |t|

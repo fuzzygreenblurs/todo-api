@@ -26,6 +26,19 @@
       # get('/lists?include=tasks', {}, headers)
     end
 
+    it "users can view their tasks across all lists" do
+      changes = {
+        title: "i now have more tasks",
+        tasks: [ { name: "eat a whole pizza", priority: "high" } ]
+      }
+      put("/lists/#{List.first.id}", changes, headers)
+
+      get('/tasks', {}, headers)
+      user_tasks = JSON.parse(last_response.body)["data"]["tasks"].map {|task| task["name"]}
+      expect(user_tasks.count).to eq(3)
+      expect(user_tasks.sort).to eq(["brush my teeth", "drink a beer", "eat a whole pizza"])
+    end
+
     it "users can get a list and its associated tasks" do
       target_list = List.last
       get("/lists/#{target_list.id}", {}, headers)
@@ -69,7 +82,7 @@
     it "users can update existing tasks or add new tasks to list" do
       target_list = List.find_by(title: "has tasks")
       existing_task = Task.find_by(list_id: target_list.id, name: "brush my teeth")
-      expect(target_list.tasks.count).to eq(1)
+      expect(target_list.tasks.count).to eq(2)
       expect(existing_task.priority).to eq("low")
 
       changes = {
@@ -83,7 +96,7 @@
       put("/lists/#{target_list.id}", changes, headers)
 
       expect(target_list.reload.title).to eq(changes[:title])
-      expect(target_list.tasks.count).to eq(2)
+      expect(target_list.tasks.count).to eq(3)
       expect(existing_task.reload.priority).to eq("high")
     end
 
@@ -94,12 +107,15 @@
 
       list_with_tasks = {
         title: "has tasks",
-        tasks: [ { name: "brush my teeth", priority: "low" } ]
+        tasks: [
+          { name: "brush my teeth", priority: "low" },
+          { name: "drink a beer", priority: "high" }
+        ]
       }
 
       post('/lists', list_with_tasks, headers)
       expect(user.reload.lists.count).to eq(2)
-      expect(user.tasks.count).to eq(1)
+      expect(user.tasks.count).to eq(2)
     end
 
     def user_token(user_id)

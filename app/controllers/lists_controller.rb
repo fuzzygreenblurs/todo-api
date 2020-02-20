@@ -4,6 +4,11 @@ class ListsController < ApplicationController
     api_response(200, lists: current_user.lists)
   end
 
+  # convenience endpoint for accessing all user tasks
+  get "/tasks" do
+    api_response(200, tasks: current_user.tasks)
+  end
+
   post "/lists" do
     list = List.create(user: current_user, title: params[:title])
     halt 401 if list.invalid?
