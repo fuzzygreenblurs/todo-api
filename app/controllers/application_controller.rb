@@ -1,7 +1,7 @@
 require './config/environment'
 
 class ApplicationController < Sinatra::Base
-  # set :show_exceptions, false
+  set :show_exceptions, false
 
   PUBLIC_ENDPOINTS = ['/', '/login', '/signup']
 

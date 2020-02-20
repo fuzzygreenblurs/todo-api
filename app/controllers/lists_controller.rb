@@ -2,43 +2,30 @@ class ListsController < ApplicationController
 
   # GET: /lists
   get "/lists" do
-    erb :"/lists/index.html"
+    api_response(200, lists: current_user.lists)
   end
 
   # POST: /lists
   post "/lists" do
-    user = User.find_by_id_or_email(params[:user_id], params[:user_email])
-    halt 400 if @user.nil?
+    list = List.create(user: current_user, title: params[:title])
+    halt 401 if list.invalid?
 
-    list = List.new
-    list.assign(user_id: user.id, tasks: params)
-    # list.user_id = user.id
-    # list.tasks = params
-    list.save
-
-    # {
-    #   list_name: "chores",
-    #   tasks: [
-    #     {
-    #       name: "clean room",
-    #       completed: false
-    #     },
-    #     {
-    #       ...
-    #     }
-    #   ]
-    # }
+    list.assign_tasks(params[:tasks])
+    201
   end
 
   # GET: /lists/5
   get "/lists/:id" do
-    erb :"/lists/show.html"
-  end
+    list = List.find_by(user_id: current_user.id, id: params[:id])
+    halt 404 unless list
+
+    api_response(200, list: list.as_json(include: :tasks))
+ end
 
   # GET: /lists/5/edit
-  get "/lists/:id/edit" do
-    erb :"/lists/edit.html"
-  end
+  # get "/lists/:id/edit" do
+  #   erb :"/lists/edit.html"
+  # end
 
   # PATCH: /lists/5
   patch "/lists/:id" do
@@ -47,6 +34,8 @@ class ListsController < ApplicationController
 
   # DELETE: /lists/5/delete
   delete "/lists/:id/delete" do
+    list = List.find_by(id: params[:id], user_id: current_user.id)
+    list.destroy if list
     redirect "/lists"
   end
 end
