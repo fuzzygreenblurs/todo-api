@@ -5,7 +5,11 @@ def controller
 end
 
 describe UsersController, type: :request do
-  before { allow(Time).to receive(:now).and_return(Time.new(2020, 2, 19)) }
+  before do
+    allow(Time).to receive(:now).and_return(Time.new(2020, 2, 19))
+    stub_const('ENV', {'JWT_SECRET' => 'MY_JWT_SECRET'})
+  end
+
   let!(:user) do
     User.find_or_create_by(email: "generaltso@email.com") do |user|
       user.first_name = "general"
@@ -63,14 +67,12 @@ describe UsersController, type: :request do
   end
 
   def user_token(user_id)
-    stub_const('ENV', {'JWT_SECRET' => 'MY_JWT_SECRET'})
-
     payload = {
       issued_at: Time.now.to_i,
       expires_at: Time.now.to_i + 3600,
       identifier: user_id
     }
-
+    
     JWT.encode(payload, ENV['JWT_SECRET'], 'HS256')
   end
 end

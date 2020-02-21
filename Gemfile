@@ -14,7 +14,7 @@ gem 'activemodel'
 gem 'annotate', '2.7.5'
 gem 'tux'
 gem 'jwt'
-
+gem 'dotenv'
 
 group :test do
   gem 'rspec'

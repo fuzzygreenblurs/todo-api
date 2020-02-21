@@ -40,8 +40,7 @@ class ApplicationController < Sinatra::Base
       #can add role capability
     }
 
-    # TO_DO: move this secret to an ENV var
-    JWT.encode(payload, 'MY_JWT_SECRET', 'HS256')
+    JWT.encode(payload, ENV['JWT_SECRET'], 'HS256')
   end
 
   def authorize_request!
@@ -69,7 +68,7 @@ class ApplicationController < Sinatra::Base
   end
 
   def decoded_payload
-    @decoded_payload ||= JWT.decode(incoming_token, 'MY_JWT_SECRET', 'HS256').first
+    @decoded_payload ||= JWT.decode(incoming_token, ENV['JWT_SECRET'], 'HS256').first
   end
 
   def skip_authorization_for_public_endpoints
